@@ -52,7 +52,6 @@ def get_gain_loss(currentPrice, purchasedPrice, numCoins):
     return originalCost, currentInvestment, gainLoss, pctGainLoss
 
 
-
 def dict_to_df(tweets):
     tweetsDf = pd.DataFrame.from_dict(tweets, orient='index')
     return tweetsDf
@@ -60,8 +59,43 @@ def dict_to_df(tweets):
 def format_df(df):
     df.insert(0, 'Tweet', df.apply( lambda row: f'<a target="_blank" href="{row.link}">{row.date.strftime("%Y-%b-%d %H:%M %Z")}</a>', axis=1 ))
     df.drop(['link', 'date'], axis=1, inplace=True)
-    df.rename(columns={"num_coins":"Number of Coins", "bitcoin_price":"Bitcoin Price", "original_cost":"Investment Cost","gain/loss":"Gain/Loss","pct gain/loss":"% Gain/Loss"}, inplace=True)
-    return df
+    df.rename(columns={"num_coins":"Number of Coins", "bitcoin_price":"Bitcoin Price",
+                        "original_cost":"Investment Cost","current_investment":"Current Investment",
+                        "gain/loss":"Gain/Loss","pct gain/loss":"% Gain/Loss"},
+                        inplace=True)
+    html = df.style.applymap(color_return, subset=['Gain/Loss', '% Gain/Loss'])\
+                .set_table_attributes('id="tweet-table"')\
+                .format(precision=2, na_rep='MISSING', thousands=",", formatter={('% Gain/Loss') : "{:.2f} %"})\
+                .format("${:,.2f}", na_rep='MISSING', subset=['Bitcoin Price', 'Investment Cost','Current Investment','Gain/Loss'])\
+                .hide_index()\
+                .set_properties(**{'width': '150 px'}, subset=['Tweet'],)\
+                .render()
+    return html
+
+def color_return(val):
+    """
+    Takes a scalar and returns a string with
+    the css property `'color: red'` for negative
+    strings, black otherwise.
+    """
+    color = 'red' if val < 0 else 'green'
+    return 'color: %s' % color
+
+def portfolio_return(df):
+    """
+    Portfolio Return
+        Sum of investment weight * investment return
+        Calculate investment weight using df['Column'].sum()
+    """
+
+    costTotal = df['Investment Cost'].sum()
+    df['Weight'] = df.apply(lambda x: (x['Investment Cost']/costTotal), axis=1)
+    df['W*R'] = df.apply(lambda x: x['Weight'] * x['% Gain/Loss'], axis=1)
+    portfolio_return = {"return": df['W*R'].sum(),
+                        "totalCost": costTotal,
+                        "string":f'The government of Nayib Bukele has invested a total of ${costTotal:,.2f}\n With an expected return of unrealized gains/losses of {df["W*R"].sum():,.2f}%'}
+    return portfolio_return
+
 
 if __name__ == "__main__":
 
@@ -70,6 +104,7 @@ if __name__ == "__main__":
 
     tweetsDf = format_df(dict_to_df(tweetsData))
     print(tweetsDf)
+
     #Calculate gain/loss return from investment
     bitPrice = get_latest_bitcoin_price('BTC-USD')
 
@@ -78,3 +113,4 @@ if __name__ == "__main__":
 # * Gain/Loss of Tweet
 # * TZ for latest price retrieved
 # * Add disclaimer of delay in latest price & not included transaction costs
+#

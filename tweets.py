@@ -26,3 +26,5 @@ tweets ={ 1: {'date': dt.datetime(2021,9,6,17,33),
             'num_coins': 410,
         }
 }
+
+returns = []
