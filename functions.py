@@ -2,6 +2,8 @@ import pandas as pd
 import numpy as np
 import yfinance as yf
 import datetime as dt
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 from tweets import tweets
 
 def get_latest_bitcoin_price(ticker):
@@ -13,7 +15,8 @@ def get_latest_bitcoin_price(ticker):
 
 def get_bitcoin_data(ticker, minDate, maxDate, column):
     df = yf.download(ticker, start=minDate, end=maxDate, interval="1h")
-    return df[column]
+    if column: return df[column]
+    else: return df
 
 def get_bitcoin_price(tweets):
     #Set min and max date from tweets dictionary
@@ -95,6 +98,27 @@ def portfolio_return(df):
                         "totalCost": costTotal,
                         "string":f'The government of Nayib Bukele has invested a total of ${costTotal:,.2f}\n With an expected return of unrealized gains/losses of {df["W*R"].sum():,.2f}%'}
     return portfolio_return
+
+
+## Plotting
+
+def create_plot():
+    fig = make_subplots(specs=[[{"secondary_y": True}]])
+
+    return fig
+
+#Plot a line chart with High as value
+def line_chart(df, fig):
+    line = {
+        'x': df.index,
+        'y': df.Close,
+        'type': 'scatter',
+        'line':{
+            'color': 'black'},
+        'name': 'Close',
+    }
+
+    fig.add_trace(line, secondary_y=False )
 
 
 if __name__ == "__main__":
