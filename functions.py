@@ -66,21 +66,32 @@ def format_df(df):
                         "original_cost":"Investment Cost","current_investment":"Current Investment",
                         "gain/loss":"Gain/Loss","pct gain/loss":"% Gain/Loss"},
                         inplace=True)
-    html = df.style.applymap(color_return, subset=['Gain/Loss', '% Gain/Loss'])\
+
+    df['Gain/Loss']=df['Gain/Loss'].apply(lambda x: f"$({abs(x):,.2f})" if (x)<0 else '${x:.2f}')
+    html = df.style.applymap(color_return_int, subset=['% Gain/Loss'])\
+                .applymap(color_return_str, subset=['Gain/Loss'])\
                 .set_table_attributes('id="tweet-table"')\
                 .format(precision=2, na_rep='MISSING', thousands=",", formatter={('% Gain/Loss') : "{:.2f} %"})\
-                .format("${:,.2f}", na_rep='MISSING', subset=['Bitcoin Price', 'Investment Cost','Current Investment','Gain/Loss'])\
-                .hide_index()\
+                .format("${:,.2f}", na_rep='MISSING', subset=['Bitcoin Price', 'Investment Cost','Current Investment'])\
+                .hide(axis='index')\
                 .set_properties(**{'width': '150 px'}, subset=['Tweet'],)\
                 .render()
     return html
 
-def color_return(val):
+def negative_numbers(val):
+    return f'${str(val)}' if val >= 0 else f'$({abs(val)})'
+
+def color_return_str(val):
     """
     Takes a scalar and returns a string with
     the css property `'color: red'` for negative
     strings, black otherwise.
     """
+
+    color = 'red' if val.startswith('$(') else 'green'
+    return 'color: %s' % color
+
+def color_return_int(val):
     color = 'red' if val < 0 else 'green'
     return 'color: %s' % color
 
@@ -91,9 +102,9 @@ def portfolio_return(df):
         Calculate investment weight using df['Column'].sum()
     """
 
-    costTotal = df['Investment Cost'].sum()
-    df['Weight'] = df.apply(lambda x: (x['Investment Cost']/costTotal), axis=1)
-    df['W*R'] = df.apply(lambda x: x['Weight'] * x['% Gain/Loss'], axis=1)
+    costTotal = df['original_cost'].sum()
+    df['Weight'] = df.apply(lambda x: (x['original_cost']/costTotal), axis=1)
+    df['W*R'] = df.apply(lambda x: x['Weight'] * x['pct gain/loss'], axis=1)
     portfolio_return = {"return": df['W*R'].sum(),
                         "totalCost": costTotal,
                         "string":f'The government of Nayib Bukele has invested a total of ${costTotal:,.2f}\n With an expected return of unrealized gains/losses of {df["W*R"].sum():,.2f}%'}

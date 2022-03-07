@@ -20,7 +20,7 @@ tweetsData = get_investment_value(tweetsData)
 
 tweetsDf = dict_to_df(tweetsData)
 
-tweetsHtml = format_df(tweetsDf)
+tweetsHtml = format_df(tweetsDf.copy())
 with st.container():
     st.write(tweetsHtml, unsafe_allow_html=True)
 
@@ -29,9 +29,12 @@ with st.container():
     st.text('')
     st.subheader(f'The government of Nayib Bukele has invested a total of ${port_return["totalCost"]:,.2f} of tax payer money in Bitcoin.')
     st.subheader(f'These investments have an Unrealized {"Loss" if port_return["return"] < 0 else "Gain"} of {port_return["return"]:+,.2f} %')
+    pt1 = f'Or an Unrealized {"Loss" if port_return["return"] < 0 else "Gain"} of'
+    pt2 = f'$({abs(tweetsDf["gain/loss"].sum()):,.2f})' if (tweetsDf["gain/loss"].sum())<0 else f'${tweetsDf["gain/loss"].sum():.2f}'
+    st.subheader(f'{pt1} {pt2}')
+
     st.text('* The calculations above exclude commission rates, transaction costs, and any other costs undisclosed by the governments.')
     st.text("* All of the information about Bitcoin purchases was extracted from Nayib Bukele's Twitter account")
-
 
 with st.expander("Bitcoin Price Chart"):
     df = get_bitcoin_data('BTC-USD', dt.date.today() - dt.timedelta(days=365), dt.date.today(), None)
