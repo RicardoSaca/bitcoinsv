@@ -75,7 +75,7 @@ def format_df(df):
                 .format("${:,.2f}", na_rep='MISSING', subset=['Bitcoin Price', 'Investment Cost','Current Investment'])\
                 .hide(axis='index')\
                 .set_properties(**{'width': '150 px'}, subset=['Tweet'],)\
-                .render()
+                .to_html()
     return html
 
 def negative_numbers(val):
