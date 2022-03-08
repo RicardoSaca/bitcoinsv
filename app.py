@@ -28,10 +28,11 @@ with st.container():
     port_return = portfolio_return(tweetsDf)
     st.text('')
     st.subheader(f'The government of Nayib Bukele has invested a total of ${port_return["totalCost"]:,.2f} of tax payer money in Bitcoin.')
-    st.subheader(f'These investments have an Unrealized {"Loss" if port_return["return"] < 0 else "Gain"} of {port_return["return"]:+,.2f} %')
+    st.subheader(f'These investments have an Unrealized {"Loss" if port_return["return"] < 0 else "Gain"} of ')
     pt1 = f'Or an Unrealized {"Loss" if port_return["return"] < 0 else "Gain"} of'
-    pt2 = f'$({abs(tweetsDf["gain/loss"].sum()):,.2f})' if (tweetsDf["gain/loss"].sum())<0 else f'${tweetsDf["gain/loss"].sum():.2f}'
-    st.subheader(f'{pt1} {pt2}')
+    pt2 = f'{port_return["return"]:+,.2f} %'
+    pt3 = f'$({abs(tweetsDf["gain/loss"].sum()):,.2f})' if (tweetsDf["gain/loss"].sum())<0 else f'${tweetsDf["gain/loss"].sum():.2f}'
+    st.subheader(f'{pt1} {pt2} or {pt3}')
 
     st.text('* The calculations above exclude commission rates, transaction costs, and any other costs undisclosed by the governments.')
     st.text("* All of the information about Bitcoin purchases was extracted from Nayib Bukele's Twitter account")
