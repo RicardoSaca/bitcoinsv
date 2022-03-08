@@ -67,7 +67,7 @@ def format_df(df):
                         "gain/loss":"Gain/Loss","pct gain/loss":"% Gain/Loss"},
                         inplace=True)
 
-    df['Gain/Loss']=df['Gain/Loss'].apply(lambda x: f"$({abs(x):,.2f})" if (x)<0 else '${x:.2f}')
+    df['Gain/Loss']=df['Gain/Loss'].apply(lambda x: f"$({abs(x):,.2f})" if (x)<0 else f'${x:.2f}')
     html = df.style.applymap(color_return_int, subset=['% Gain/Loss'])\
                 .applymap(color_return_str, subset=['Gain/Loss'])\
                 .set_table_attributes('id="tweet-table"')\
