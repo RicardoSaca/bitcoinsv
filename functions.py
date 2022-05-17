@@ -5,6 +5,7 @@ import datetime as dt
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from tweets import tweets
+from datetime import timezone
 
 def get_latest_bitcoin_price(ticker):
     df =yf.download(ticker, period='1d', interval='1m')
@@ -28,8 +29,8 @@ def get_bitcoin_price(tweets):
 
     #Identify price of tweet
     for tweet in tweets:
-        date = tweets[tweet]['date'].strftime('%Y-%m-%d %H:00:00+00:00')
-        date = pd.Timestamp(date)
+        date = tweets[tweet]['date']
+        date = pd.Timestamp(date, tzinfo=timezone.utc)
         bitPrice = df.iloc[df.index.get_indexer([date], method='nearest')][0]
         tweets[tweet]['bitcoin_price'] = bitPrice
 
@@ -124,8 +125,9 @@ def line_chart(df, fig):
         'x': df.index,
         'y': df.Close,
         'type': 'scatter',
+        'fill':'tozeroy',
         'line':{
-            'color': 'black'},
+            'color': 'green' if df.Close[0] < df.Close[-1] else 'red'},
         'name': 'Close',
     }
 

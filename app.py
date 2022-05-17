@@ -33,7 +33,7 @@ with st.container():
     pt3 = f'$({abs(tweetsDf["gain/loss"].sum()):,.2f})' if (tweetsDf["gain/loss"].sum())<0 else f'${tweetsDf["gain/loss"].sum():.2f}'
     st.subheader(f'{pt1} {pt2} or {pt3}')
 
-    st.text('* The calculations above exclude commission rates, transaction costs, and any other costs undisclosed by the governments.')
+    st.text('* The calculations above exclude commission rates, transaction costs, and any other costs undisclosed by the government.')
     st.text("* All of the information about Bitcoin purchases was extracted from Nayib Bukele's Twitter account")
 
 with st.expander("Bitcoin Price Chart"):
