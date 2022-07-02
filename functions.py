@@ -1,3 +1,4 @@
+from cProfile import label
 import pandas as pd
 import numpy as np
 import yfinance as yf
@@ -9,9 +10,8 @@ from datetime import timezone
 
 def get_latest_bitcoin_price(ticker):
     df =yf.download(ticker, period='1d', interval='1m')
-    bitcoinPrice = df['Close'].iloc[-1]
+    bitcoinPrice = df['Close'].iloc[-1] if df.shape[0] > 1 else df['Close'].iloc[0]
     time = dt.datetime.fromtimestamp(int(round(df.index[-1].timestamp())))
-
     return [time, bitcoinPrice]
 
 def get_bitcoin_data(ticker, minDate, maxDate, column):
@@ -61,19 +61,28 @@ def dict_to_df(tweets):
     return tweetsDf
 
 def format_df(df):
-    df.insert(0, 'Tweet', df.apply( lambda row: f'<a target="_blank" href="{row.link}">{row.date.strftime("%Y-%b-%d %H:%M %Z")}</a>', axis=1 ))
+    df.insert(0, 'Tweet', df.apply( lambda row: f'<a target="_blank" href="{row.link}" style="text-decoration:none;"> &#128197; {row.date.strftime("%Y %b %d %H:%M %Z")} CST</a>', axis=1 ))
     df.drop(['link', 'date'], axis=1, inplace=True)
-    df.rename(columns={"num_coins":"Number of Coins", "bitcoin_price":"Bitcoin Price",
-                        "original_cost":"Investment Cost","current_investment":"Current Investment",
-                        "gain/loss":"Gain/Loss","pct gain/loss":"% Gain/Loss"},
+    df.rename(columns={"num_coins":"Amount of Bitcoin", "bitcoin_price":"Bitcoin Price",
+                        "original_cost":"Cost","current_investment":"Current Value",
+                        "gain/loss":"P/L","pct gain/loss":"% P/L"},
                         inplace=True)
+    df.loc['Total'] = df.iloc[:, :-1].sum()
+    df.loc['Total', 'Tweet'] = '<b>Total<b>'
+    df.loc['Total', '% P/L'] = ((df.loc['Total', 'Current Value']- df.loc['Total', 'Cost'])/df.loc['Total', 'Cost'])*100
+    df['Amount of Bitcoin'] = df['Amount of Bitcoin'].apply(lambda x: f"₿ {x:,.0f}")
 
-    df['Gain/Loss']=df['Gain/Loss'].apply(lambda x: f"$({abs(x):,.2f})" if (x)<0 else f"${x:,.2f}")
-    html = df.style.applymap(color_return_int, subset=['% Gain/Loss'])\
-                .applymap(color_return_str, subset=['Gain/Loss'])\
+
+    df['P/L']=df['P/L'].apply(lambda x: f"$({abs(x):,.2f})" if (x)<0 else f"${x:,.2f}")
+
+    last_row = pd.IndexSlice[df.index[df.index == "Total"], :]
+
+    html = df.style.applymap(color_return_int, subset=['% P/L'])\
+                .applymap(color_return_str, subset=['P/L'])\
+                .applymap(style_bold, subset=last_row)\
                 .set_table_attributes('id="tweet-table"')\
-                .format(precision=2, na_rep='MISSING', thousands=",", formatter={('% Gain/Loss') : "{:.2f} %"})\
-                .format("${:,.2f}", na_rep='MISSING', subset=['Bitcoin Price', 'Investment Cost','Current Investment'])\
+                .format(precision=2, na_rep='MISSING', thousands=",", formatter={('% P/L') : "{:.2f} %"})\
+                .format("${:,.2f}", na_rep='MISSING', subset=['Bitcoin Price', 'Cost','Current Value'])\
                 .hide(axis='index')\
                 .set_properties(**{'width': '150 px'}, subset=['Tweet'],)\
                 .to_html()
@@ -96,19 +105,24 @@ def color_return_int(val):
     color = 'red' if val < 0 else 'green'
     return 'color: %s' % color
 
+def style_bold(val):
+    return "font-weight: bold"
+
 def portfolio_return(df):
     """
     Portfolio Return
         Sum of investment weight * investment return
         Calculate investment weight using df['Column'].sum()
     """
-
     costTotal = df['original_cost'].sum()
     df['Weight'] = df.apply(lambda x: (x['original_cost']/costTotal), axis=1)
     df['W*R'] = df.apply(lambda x: x['Weight'] * x['pct gain/loss'], axis=1)
+
     portfolio_return = {"return": df['W*R'].sum(),
+                        "current": df['current_investment'].sum(),
                         "totalCost": costTotal,
-                        "string":f'The government of Nayib Bukele has invested a total of ${costTotal:,.2f}\n With an expected return of unrealized gains/losses of {df["W*R"].sum():,.2f}%'}
+                        }
+    df.drop(labels=['Weight', 'W*R'], axis=1, inplace=True)
     return portfolio_return
 
 
