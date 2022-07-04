@@ -49,6 +49,8 @@ with st.container():
 
             * The calculations above exclude commission rates, transaction costs, and any other costs undisclosed by the government.
             * All of the information about Bitcoin purchases was extracted from <a target="_blank" href='https://twitter.com/nayibbukele?s=20&t=VGMt2H2TdZ3pnnrEceTaKw' style="text-decoration:none;"> Nayib Bukele's Twitter account</a>.
+            * The Bitcoin Price information was retrieved from yahoo finance, the price of purchase is calculated on the closest hour to the time of purchase.
+            * The information is a close approximation, however it is recommended that the data is read with a pinch of salt.
         """
     , unsafe_allow_html=True)
     st.text('')
