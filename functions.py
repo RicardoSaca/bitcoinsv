@@ -30,7 +30,7 @@ def get_bitcoin_price(tweets):
     #Identify price of tweet
     for tweet in tweets:
         date = tweets[tweet]['date']
-        date = pd.Timestamp(date, tzinfo=timezone.utc)
+        date = pd.Timestamp(date)
         bitPrice = df.iloc[df.index.get_indexer([date], method='nearest')][0]
         tweets[tweet]['bitcoin_price'] = bitPrice
 
