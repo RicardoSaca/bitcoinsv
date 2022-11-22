@@ -1,7 +1,5 @@
-from operator import index
 import streamlit as st
 import pandas as pd
-import numpy as np
 import datetime as dt
 from functions import dict_to_df, get_bitcoin_data, get_bitcoin_price, get_investment_value, get_latest_bitcoin_price, format_df, portfolio_return, create_plot, line_chart, get_daily_bitcoin
 from tweets import tweets
@@ -21,8 +19,8 @@ bitHourly = get_bitcoin_data("BTC-USD", minDate, maxDate, "Close", "1h")
 bitPrice = get_latest_bitcoin_price('BTC-USD')
 tweetsData = get_bitcoin_price(tweets, bitHourly)
 tweetsDaily = get_daily_bitcoin(tweetsData, bitDaily)
-tweetsData = get_investment_value(tweetsDaily, bitPrice[1])
-tweetsDf = dict_to_df(tweetsData)
+tweetsComplete = get_investment_value(tweetsDaily, bitPrice[1])
+tweetsDf = dict_to_df(tweetsComplete)
 port_return = portfolio_return(tweetsDf)
 tweetsHtml = format_df(tweetsDf.copy())
 

@@ -1,6 +1,4 @@
-from cProfile import label
 import pandas as pd
-import numpy as np
 import yfinance as yf
 import datetime as dt
 import plotly.graph_objects as go
@@ -40,7 +38,7 @@ def get_daily_bitcoin(tweets, bitDaily):
     for day in range(1, int((pd.Timestamp.today() - bit_per_day_date).days)):
         date = bit_per_day_date + datetime.timedelta(days=day)
         latest += 1
-        bitPrice = bitDaily.iloc[bitDaily.index.get_indexer([date], method='nearest')][0]
+        bitPrice = bitDaily.iloc[bitDaily.index.get_indexer([pd.Timestamp(date)], method='nearest')][0]
         tweets[latest] = {'date': pd.to_datetime((bit_per_day_date + datetime.timedelta(days=day)).strftime('%Y-%m-%d')),
                             'link':'https://twitter.com/nayibbukele/status/1593113857261965312?s=46&t=lTdkuYKDUQ6KKCYNpKuVIQ',
                             'num_coins':1,
