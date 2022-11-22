@@ -3,7 +3,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import datetime as dt
-from functions import dict_to_df, get_bitcoin_data, get_bitcoin_price, get_investment_value, get_latest_bitcoin_price, format_df, portfolio_return, create_plot, line_chart
+from functions import dict_to_df, get_bitcoin_data, get_bitcoin_price, get_investment_value, get_latest_bitcoin_price, format_df, portfolio_return, create_plot, line_chart, get_daily_bitcoin
 from tweets import tweets
 
 st.set_page_config(layout="wide")
@@ -13,6 +13,7 @@ st.markdown("# :flag-sv: El Salvador's Government Bitcoin Tracker")
 # Prep all data
 bitPrice = get_latest_bitcoin_price('BTC-USD')
 tweetsData = get_bitcoin_price(tweets)
+tweetsData = get_daily_bitcoin(tweetsData)
 tweetsData = get_investment_value(tweetsData)
 tweetsDf = dict_to_df(tweetsData)
 port_return = portfolio_return(tweetsDf)
@@ -51,6 +52,7 @@ with st.container():
             * All of the information about Bitcoin purchases was extracted from <a target="_blank" href='https://twitter.com/nayibbukele?s=20&t=VGMt2H2TdZ3pnnrEceTaKw' style="text-decoration:none;"> Nayib Bukele's Twitter account</a>.
             * The Bitcoin Price information was retrieved from yahoo finance, the price of purchase is calculated on the closest hour to the time of purchase.
             * The information is a close approximation, however it is recommended that the data is read with a pinch of salt.
+            * Bukele announced via <a target="_blank" href="https://twitter.com/nayibbukele/status/1593113857261965312?s=46&t=lTdkuYKDUQ6KKCYNpKuVIQ" style="text-decoration:none;">Twitter on November 16th, 2022</a> that he would purchase one Bitcoin a day starting November 17th, 2022.
         """
     , unsafe_allow_html=True)
     st.text('')
@@ -58,7 +60,7 @@ with st.container():
     # st.subheader(f'{pt1} {pt2} or {pt3}')
 
 with st.expander("Bitcoin Price Chart"):
-    df = get_bitcoin_data('BTC-USD', dt.date.today() - dt.timedelta(days=365), dt.date.today(), None)
+    df = get_bitcoin_data('BTC-USD', dt.date.today() - dt.timedelta(days=365), dt.date.today(), None, '1h')
 
     fig = create_plot()
     line_chart(df, fig)

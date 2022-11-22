@@ -6,7 +6,7 @@ import datetime as dt
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from tweets import tweets
-from datetime import timezone
+import datetime
 
 def get_latest_bitcoin_price(ticker):
     df =yf.download(ticker, period='1d', interval='1m')
@@ -14,10 +14,11 @@ def get_latest_bitcoin_price(ticker):
     time = dt.datetime.fromtimestamp(int(round(df.index[-1].timestamp())))
     return [time, bitcoinPrice]
 
-def get_bitcoin_data(ticker, minDate, maxDate, column):
-    df = yf.download(ticker, start=minDate, end=maxDate, interval="1h")
+def get_bitcoin_data(ticker, minDate, maxDate, column, interval):
+    df = yf.download(ticker, start=minDate, end=maxDate, interval=interval)
     if column: return df[column]
     else: return df
+
 
 def get_bitcoin_price(tweets):
     #Set min and max date from tweets dictionary
@@ -25,7 +26,7 @@ def get_bitcoin_price(tweets):
     maxDate = tweets[max(tweets, key=lambda x:tweets[x]['date'])]['date'].replace(second=0, hour=0, minute=0) + dt.timedelta(days=1)
 
     #Retrieve bitcoin close data by the hour
-    df = get_bitcoin_data("BTC-USD", minDate, maxDate, "Close")
+    df = get_bitcoin_data("BTC-USD", minDate, maxDate, "Close", "1h")
 
     #Identify price of tweet
     for tweet in tweets:
@@ -35,6 +36,26 @@ def get_bitcoin_price(tweets):
         tweets[tweet]['bitcoin_price'] = bitPrice
 
     #Return tweets
+    return tweets
+
+def get_daily_bitcoin(tweets):
+    last = list(tweets)[-1]
+    bit_per_day = tweets[last]
+    bit_per_day_date = bit_per_day['date']
+
+    #Retrieve bitcoin close data by the hour
+    df = get_bitcoin_data("BTC-USD", bit_per_day_date, pd.Timestamp.today(), "Close", "1d")
+
+    latest = last
+    for day in range(1, int((pd.Timestamp.today() - bit_per_day_date).days)):
+        date = bit_per_day_date + datetime.timedelta(days=day)
+        latest += 1
+        bitPrice = df.iloc[df.index.get_indexer([date], method='nearest')][0]
+        tweets[latest] = {'date': pd.to_datetime((bit_per_day_date + datetime.timedelta(days=day)).strftime('%Y-%m-%d')),
+                            'link':'https://twitter.com/nayibbukele/status/1593113857261965312?s=46&t=lTdkuYKDUQ6KKCYNpKuVIQ',
+                            'num_coins':1,
+                            'bitcoin_price':bitPrice}
+    tweets.pop(last)
     return tweets
 
 def get_investment_value(tweets):
@@ -63,15 +84,14 @@ def dict_to_df(tweets):
 def format_df(df):
     df.insert(0, 'Tweet', df.apply( lambda row: f'<a target="_blank" href="{row.link}" style="text-decoration:none;"> &#128197; {row.date.strftime("%Y %b %d %H:%M %Z")} CST</a>', axis=1 ))
     df.drop(['link', 'date'], axis=1, inplace=True)
-    df.rename(columns={"num_coins":"Amount of Bitcoin", "bitcoin_price":"Bitcoin Price",
+    df.rename(columns={"num_coins":"# of Bitcoin", "bitcoin_price":"Bitcoin Price",
                         "original_cost":"Cost","current_investment":"Current Value",
                         "gain/loss":"P/L","pct gain/loss":"% P/L"},
                         inplace=True)
     df.loc['Total'] = df.iloc[:, :-1].sum()
     df.loc['Total', 'Tweet'] = '<b>Total<b>'
     df.loc['Total', '% P/L'] = ((df.loc['Total', 'Current Value']- df.loc['Total', 'Cost'])/df.loc['Total', 'Cost'])*100
-    df['Amount of Bitcoin'] = df['Amount of Bitcoin'].apply(lambda x: f"₿ {x:,.0f}")
-
+    df['# of Bitcoin'] = df['# of Bitcoin'].apply(lambda x: f"₿ {x:,.0f}")
 
     df['P/L']=df['P/L'].apply(lambda x: f"$({abs(x):,.2f})" if (x)<0 else f"${x:,.2f}")
 
@@ -150,14 +170,15 @@ def line_chart(df, fig):
 
 if __name__ == "__main__":
 
-    tweetsData = get_bitcoin_price(tweets)
-    tweetsData = get_investment_value(tweetsData)
+    get_daily_bitcoin(tweets)
+    # tweetsData = get_bitcoin_price(tweets)
+    # tweetsData = get_investment_value(tweetsData)
 
-    tweetsDf = format_df(dict_to_df(tweetsData))
-    print(tweetsDf)
+    # tweetsDf = format_df(dict_to_df(tweetsData))
+    # # print(tweetsDf)
 
-    #Calculate gain/loss return from investment
-    bitPrice = get_latest_bitcoin_price('BTC-USD')
+    # #Calculate gain/loss return from investment
+    # bitPrice = get_latest_bitcoin_price('BTC-USD')
 
 
 #To-Do:

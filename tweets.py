@@ -41,7 +41,10 @@ tweets ={
             'num_coins': 500,},
         11: {'date': dt.datetime(2022,6,30,5,41),
             'link':'https://twitter.com/nayibbukele/status/1542672286490271744?s=20&t=K93ghWJ4xkTndCdfNcaeNw',
-            'num_coins':80, }
+            'num_coins':80, },
+        12:{'date': dt.datetime(2022, 11, 16, 11, 28),
+            'link':'https://twitter.com/nayibbukele/status/1593113857261965312?s=46&t=lTdkuYKDUQ6KKCYNpKuVIQ',
+            'num_coins':0}
 }
 
 returns = []
