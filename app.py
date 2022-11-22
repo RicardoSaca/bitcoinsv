@@ -10,11 +10,18 @@ st.set_page_config(layout="wide")
 
 st.markdown("# :flag-sv: El Salvador's Government Bitcoin Tracker")
 
+#Get Bitcoin data
+bitDaily =  get_bitcoin_data("BTC-USD", tweets[list(tweets)[-1]]['date'], pd.Timestamp.today(), "Close", "1d")
+#Set min and max date from tweets dictionary
+minDate = tweets[min(tweets, key=lambda x:tweets[x]['date'])]['date'].replace(second=0, hour=0, minute=0)
+maxDate = tweets[max(tweets, key=lambda x:tweets[x]['date'])]['date'].replace(second=0, hour=0, minute=0) + dt.timedelta(days=1)
+bitHourly = get_bitcoin_data("BTC-USD", minDate, maxDate, "Close", "1h")
+
 # Prep all data
 bitPrice = get_latest_bitcoin_price('BTC-USD')
-tweetsData = get_bitcoin_price(tweets)
-tweetsData = get_daily_bitcoin(tweetsData)
-tweetsData = get_investment_value(tweetsData)
+tweetsData = get_bitcoin_price(tweets, bitHourly)
+tweetsDaily = get_daily_bitcoin(tweetsData, bitDaily)
+tweetsData = get_investment_value(tweetsDaily, bitPrice[1])
 tweetsDf = dict_to_df(tweetsData)
 port_return = portfolio_return(tweetsDf)
 tweetsHtml = format_df(tweetsDf.copy())
@@ -37,13 +44,10 @@ with st.container():
 
 with st.container():
     st.text('')
-    # pt1 = f'These investments have an Unrealized {"Loss" if port_return["return"] < 0 else "Gain"} of'
-    # pt2 = f'{port_return["return"]:+,.2f} %'
     pt3 = f'$({abs(tweetsDf["gain/loss"].sum()):,.2f})' if (tweetsDf["gain/loss"].sum())<0 else f'${tweetsDf["gain/loss"].sum():.2f}'
     color = f"{'green' if port_return['return'] > 0 else 'red'}"
     total_cost = f"{port_return['totalCost']:,.2f}"
     st.markdown('# Summary:')
-    # ${port_return['totalCost']:,.2f}
     st.markdown(
         f"""
             <span style='font-size:1.5em;'>Bukele has invested \${total_cost} of tax payer money in Bitcoin with an Unrealized {':chart_with_downwards_trend:' if port_return['return'] < 0 else ':chart_with_upwards_trend:'} of <span style='color:{color};'>{port_return['return']:+,.2f}% </span> or  <span style='color:{color};'>{pt3}</span></span>
@@ -52,12 +56,10 @@ with st.container():
             * All of the information about Bitcoin purchases was extracted from <a target="_blank" href='https://twitter.com/nayibbukele?s=20&t=VGMt2H2TdZ3pnnrEceTaKw' style="text-decoration:none;"> Nayib Bukele's Twitter account</a>.
             * The Bitcoin Price information was retrieved from yahoo finance, the price of purchase is calculated on the closest hour to the time of purchase.
             * The information is a close approximation, however it is recommended that the data is read with a pinch of salt.
-            * Bukele announced via <a target="_blank" href="https://twitter.com/nayibbukele/status/1593113857261965312?s=46&t=lTdkuYKDUQ6KKCYNpKuVIQ" style="text-decoration:none;">Twitter on November 16th, 2022</a> that he would purchase one Bitcoin a day starting November 17th, 2022.
+            * Bukele announced via <a target="_blank" href="https://twitter.com/nayibbukele/status/1593113857261965312?s=46&t=lTdkuYKDUQ6KKCYNpKuVIQ" style="text-decoration:none;">Twitter on November 16th, 2022</a> that he would purchase one Bitcoin a day starting November 17th, 2022. Purchases are implemented using the daily close as the daily estimated purcahse value.
         """
     , unsafe_allow_html=True)
     st.text('')
-    # st.subheader(f'The government of Nayib Bukele has invested a total of ${port_return["totalCost"]:,.2f} of tax payer money in Bitcoin.')
-    # st.subheader(f'{pt1} {pt2} or {pt3}')
 
 with st.expander("Bitcoin Price Chart"):
     df = get_bitcoin_data('BTC-USD', dt.date.today() - dt.timedelta(days=365), dt.date.today(), None, '1h')

@@ -20,48 +20,36 @@ def get_bitcoin_data(ticker, minDate, maxDate, column, interval):
     else: return df
 
 
-def get_bitcoin_price(tweets):
-    #Set min and max date from tweets dictionary
-    minDate = tweets[min(tweets, key=lambda x:tweets[x]['date'])]['date'].replace(second=0, hour=0, minute=0)
-    maxDate = tweets[max(tweets, key=lambda x:tweets[x]['date'])]['date'].replace(second=0, hour=0, minute=0) + dt.timedelta(days=1)
-
-    #Retrieve bitcoin close data by the hour
-    df = get_bitcoin_data("BTC-USD", minDate, maxDate, "Close", "1h")
-
+def get_bitcoin_price(tweets, bitHourly):
     #Identify price of tweet
     for tweet in tweets:
         date = tweets[tweet]['date']
         date = pd.Timestamp(date)
-        bitPrice = df.iloc[df.index.get_indexer([date], method='nearest')][0]
+        bitPrice = bitHourly.iloc[bitHourly.index.get_indexer([date], method='nearest')][0]
         tweets[tweet]['bitcoin_price'] = bitPrice
 
     #Return tweets
     return tweets
 
-def get_daily_bitcoin(tweets):
+def get_daily_bitcoin(tweets, bitDaily):
     last = list(tweets)[-1]
     bit_per_day = tweets[last]
     bit_per_day_date = bit_per_day['date']
-
-    #Retrieve bitcoin close data by the hour
-    df = get_bitcoin_data("BTC-USD", bit_per_day_date, pd.Timestamp.today(), "Close", "1d")
 
     latest = last
     for day in range(1, int((pd.Timestamp.today() - bit_per_day_date).days)):
         date = bit_per_day_date + datetime.timedelta(days=day)
         latest += 1
-        bitPrice = df.iloc[df.index.get_indexer([date], method='nearest')][0]
+        bitPrice = bitDaily.iloc[bitDaily.index.get_indexer([date], method='nearest')][0]
         tweets[latest] = {'date': pd.to_datetime((bit_per_day_date + datetime.timedelta(days=day)).strftime('%Y-%m-%d')),
                             'link':'https://twitter.com/nayibbukele/status/1593113857261965312?s=46&t=lTdkuYKDUQ6KKCYNpKuVIQ',
                             'num_coins':1,
                             'bitcoin_price':bitPrice}
-        print(f'{day}: {date} -  ${bitPrice:,.2f}')
     tweets.pop(last)
     return tweets
 
-def get_investment_value(tweets):
-
-    currentPrice = get_latest_bitcoin_price("BTC-USD")[1]
+def get_investment_value(tweets, latestBitPrice):
+    currentPrice = latestBitPrice
     for tweet in tweets:
         purchasedPrice = tweets[tweet]['bitcoin_price']
         numCoins = tweets[tweet]['num_coins']
