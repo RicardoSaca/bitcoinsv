@@ -55,6 +55,7 @@ def get_daily_bitcoin(tweets):
                             'link':'https://twitter.com/nayibbukele/status/1593113857261965312?s=46&t=lTdkuYKDUQ6KKCYNpKuVIQ',
                             'num_coins':1,
                             'bitcoin_price':bitPrice}
+        print(f'{day}: {date} -  ${bitPrice:,.2f}')
     tweets.pop(last)
     return tweets
 
