@@ -9,7 +9,7 @@ st.set_page_config(layout="wide")
 st.markdown("# :flag-sv: El Salvador's Government Bitcoin Tracker")
 
 #Get Bitcoin data
-bitDaily =  get_bitcoin_data("BTC-USD", tweets[list(tweets)[-1]]['date'], pd.Timestamp.today(), "Close", "1d")
+bitDaily =  get_bitcoin_data("BTC-USD", dt.datetime(2022, 11, 16), pd.Timestamp.today(), "Close", "1d")
 #Set min and max date from tweets dictionary
 minDate = tweets[min(tweets, key=lambda x:tweets[x]['date'])]['date'].replace(second=0, hour=0, minute=0)
 maxDate = tweets[max(tweets, key=lambda x:tweets[x]['date'])]['date'].replace(second=0, hour=0, minute=0) + dt.timedelta(days=1)
@@ -17,9 +17,11 @@ bitHourly = get_bitcoin_data("BTC-USD", minDate, maxDate, "Close", "1h")
 
 # Prep all data
 bitPrice = get_latest_bitcoin_price('BTC-USD')
-tweetsData = get_bitcoin_price(tweets, bitHourly)
-tweetsDaily = get_daily_bitcoin(tweetsData, bitDaily)
-tweetsComplete = get_investment_value(tweetsDaily, bitPrice[1])
+tweetsData = get_bitcoin_price(tweets, bitHourly) # get info for regular tweets
+tweetsDaily = get_daily_bitcoin(tweets, bitDaily) # get daily purhcases
+tweetsAll = {**tweetsData, **tweetsDaily} # join Tweet dictionaries
+tweetsAll.pop(12) # drop Tweet announcing daily purchases
+tweetsComplete = get_investment_value(tweetsAll, bitPrice[1])
 tweetsDf = dict_to_df(tweetsComplete)
 port_return = portfolio_return(tweetsDf)
 tweetsHtml = format_df(tweetsDf.copy())

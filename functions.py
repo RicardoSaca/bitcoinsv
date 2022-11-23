@@ -33,18 +33,17 @@ def get_daily_bitcoin(tweets, bitDaily):
     last = list(tweets)[-1]
     bit_per_day = tweets[last]
     bit_per_day_date = bit_per_day['date']
-
     latest = last
+    tweetsDaily = {}
     for day in range(1, int((pd.Timestamp.today() - bit_per_day_date).days)):
-        date = bit_per_day_date + datetime.timedelta(days=day)
+        date = pd.to_datetime((bit_per_day_date + datetime.timedelta(days=day))).strftime('%Y-%m-%d')
         latest += 1
-        bitPrice = bitDaily.iloc[bitDaily.index.get_indexer([pd.Timestamp(date)], method='nearest')][0]
-        tweets[latest] = {'date': pd.to_datetime((bit_per_day_date + datetime.timedelta(days=day)).strftime('%Y-%m-%d')),
+        bitPrice = bitDaily.iloc[bitDaily.index.get_indexer([date], method='nearest')][0]
+        tweetsDaily[latest] = {'date': pd.to_datetime((bit_per_day_date + datetime.timedelta(days=day)).strftime('%Y-%m-%d')),
                             'link':'https://twitter.com/nayibbukele/status/1593113857261965312?s=46&t=lTdkuYKDUQ6KKCYNpKuVIQ',
                             'num_coins':1,
-                            'bitcoin_price':bitPrice}
-    tweets.pop(last)
-    return tweets
+                            'bitcoin_price': bitPrice}
+    return tweetsDaily
 
 def get_investment_value(tweets, latestBitPrice):
     currentPrice = latestBitPrice
