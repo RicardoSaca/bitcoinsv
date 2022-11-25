@@ -35,7 +35,8 @@ def get_daily_bitcoin(tweets, bitDaily):
     bit_per_day_date = bit_per_day['date']
     latest = last
     tweetsDaily = {}
-    for day in range(1, int((pd.Timestamp.today() - bit_per_day_date).days)):
+    for day in range(1, int((pd.Timestamp.today() - bit_per_day_date).days)+1):
+        print(day)
         date = pd.to_datetime((bit_per_day_date + datetime.timedelta(days=day))).strftime('%Y-%m-%d')
         latest += 1
         bitPrice = bitDaily.iloc[bitDaily.index.get_indexer([date], method='nearest')][0]
@@ -76,6 +77,7 @@ def format_df(df):
                         inplace=True)
     df.loc['Total'] = df.iloc[:, :-1].sum()
     df.loc['Total', 'Tweet'] = '<b>Total<b>'
+    df.loc['Total', 'Bitcoin Price'] = df["Bitcoin Price"][:-1].mean()
     df.loc['Total', '% P/L'] = ((df.loc['Total', 'Current Value']- df.loc['Total', 'Cost'])/df.loc['Total', 'Cost'])*100
     df['# of Bitcoin'] = df['# of Bitcoin'].apply(lambda x: f"₿ {x:,.0f}")
 
