@@ -34,7 +34,7 @@ with col1:
 with col2:
     #Investment Gain/Loss
     port_delta = f'$({abs(tweetsDf["gain/loss"].sum()):,.2f})' if (tweetsDf["gain/loss"].sum())<0 else f'${tweetsDf["gain/loss"].sum():.2f}'
-    st.metric(f"Postion Return", value=port_delta, delta=f"{port_return['return']:-,.2f}%")
+    st.metric(f"Position Return", value=port_delta, delta=f"{port_return['return']:-,.2f}%")
 with col3:
     #Bitcoin Value
     st.metric(f'Bitcoin Price as of {bitPrice[0].strftime("%Y-%b-%d %H:%M %Z")}', value=f'${bitPrice[1]:,.2f}')
@@ -56,7 +56,7 @@ with st.container():
             * All of the information about Bitcoin purchases was extracted from <a target="_blank" href='https://twitter.com/nayibbukele?s=20&t=VGMt2H2TdZ3pnnrEceTaKw' style="text-decoration:none;"> Nayib Bukele's Twitter account</a>.
             * The Bitcoin Price information was retrieved from yahoo finance, the price of purchase is calculated on the closest hour to the time of purchase.
             * The information is a close approximation, however it is recommended that the data is read with a pinch of salt.
-            * Bukele announced via <a target="_blank" href="https://twitter.com/nayibbukele/status/1593113857261965312?s=46&t=lTdkuYKDUQ6KKCYNpKuVIQ" style="text-decoration:none;">Twitter on November 16th, 2022</a> that he would purchase one Bitcoin a day starting November 17th, 2022. Purchases are implemented using the daily close as the daily estimated purcahse value.
+            * Bukele announced via <a target="_blank" href="https://twitter.com/nayibbukele/status/1593113857261965312?s=46&t=lTdkuYKDUQ6KKCYNpKuVIQ" style="text-decoration:none;">Twitter on November 16th, 2022</a> that he would purchase one Bitcoin a day starting November 17th, 2022. Purchases are implemented using the daily close as the daily estimated purchase value.
         """
     , unsafe_allow_html=True)
     st.text('')

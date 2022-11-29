@@ -35,7 +35,7 @@ def get_daily_bitcoin(tweets, bitDaily):
     bit_per_day_date = bit_per_day['date']
     latest = last
     tweetsDaily = {}
-    for day in range(1, int((pd.Timestamp.today() - bit_per_day_date).days)+1):
+    for day in range(1, int((pd.Timestamp.today() - bit_per_day_date).days)):
         print(day)
         date = pd.to_datetime((bit_per_day_date + datetime.timedelta(days=day))).strftime('%Y-%m-%d')
         latest += 1
