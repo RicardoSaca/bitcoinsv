@@ -68,13 +68,31 @@ def dict_to_df(tweets):
     tweetsDf = pd.DataFrame.from_dict(tweets, orient='index')
     return tweetsDf
 
-def format_df(df):
+def add_daily(dailyDf):
+    #Summarize dailyDf
+    summary = {
+        'date':dailyDf.iloc[0].date,
+        'link':dailyDf.iloc[0].link,
+        'num_coins': dailyDf['num_coins'].sum(),
+        'bitcoin_price': np.average(a = dailyDf['bitcoin_price'], weights= dailyDf['num_coins']),
+        'original_cost': dailyDf['original_cost'].sum(),
+        'current_investment':  dailyDf['current_investment'].sum(),
+        'gain/loss': dailyDf['gain/loss'].sum(),
+        'pct gain/loss':((dailyDf['current_investment'].sum()- dailyDf['original_cost'].sum())/dailyDf['original_cost'].sum())*100
+    }
+    return summary
+
+def format_df(df, summary=False):
     df.insert(0, 'Tweet', df.apply( lambda row: f'<a target="_blank" href="{row.link}" style="text-decoration:none;"> &#128197; {row.date.strftime("%Y %b %d %H:%M %Z")} CST</a>', axis=1 ))
+    if summary == True:
+        tail = df.tail(1)
+        df.loc[df.index[-1], 'Tweet'] = f'<a target="_blank" href="{df.loc[df.index[-1], "link"]}" style="text-decoration:none;"> &#128197; {df.loc[df.index[-1], "date"].strftime("%Y %b %d %H:%M %Z")} CST (&#128260; purchase)</a>'
     df.drop(['link', 'date'], axis=1, inplace=True)
     df.rename(columns={"num_coins":"# of Bitcoin", "bitcoin_price":"Bitcoin Price",
                         "original_cost":"Cost","current_investment":"Current Value",
                         "gain/loss":"P/L","pct gain/loss":"% P/L"},
                         inplace=True)
+
     df.loc['Total'] = df.iloc[:, :-1].sum()
     df.loc['Total', 'Tweet'] = '<b>Total<b>'
     df.loc['Total', 'Bitcoin Price'] = np.average(a = df['Bitcoin Price'][:-1], weights= df['# of Bitcoin'][:-1])
@@ -82,9 +100,10 @@ def format_df(df):
     df['# of Bitcoin'] = df['# of Bitcoin'].apply(lambda x: f"₿ {x:,.0f}")
 
     df['P/L']=df['P/L'].apply(lambda x: f"$({abs(x):,.2f})" if (x)<0 else f"${x:,.2f}")
+    return df
 
+def df_to_html(df):
     last_row = pd.IndexSlice[df.index[df.index == "Total"], :]
-
     html = df.style.applymap(color_return_int, subset=['% P/L'])\
                 .applymap(color_return_str, subset=['P/L'])\
                 .applymap(style_bold, subset=last_row)\
@@ -122,17 +141,16 @@ def portfolio_return(df):
         Sum of investment weight * investment return
         Calculate investment weight using df['Column'].sum()
     """
-    costTotal = df['original_cost'].sum()
-    df['Weight'] = df.apply(lambda x: (x['original_cost']/costTotal), axis=1)
-    df['W*R'] = df.apply(lambda x: x['Weight'] * x['pct gain/loss'], axis=1)
+    costTotal = df["Cost"].sum()
+    df['Weight'] = df.apply(lambda x: (x["Cost"]/costTotal), axis=1)
+    df['W*R'] = df.apply(lambda x: x['Weight'] * x['% P/L'], axis=1)
 
     portfolio_return = {"return": df['W*R'].sum(),
-                        "current": df['current_investment'].sum(),
+                        "current": df['Current Value'].sum(),
                         "totalCost": costTotal,
                         }
     df.drop(labels=['Weight', 'W*R'], axis=1, inplace=True)
     return portfolio_return
-
 
 ## Plotting
 
