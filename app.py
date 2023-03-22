@@ -19,7 +19,7 @@ bitHourly = get_bitcoin_data("BTC-USD", minDate, maxDate, "Close", "1h")
 bitPrice = get_latest_bitcoin_price('BTC-USD')
 tweetsData = get_bitcoin_price(tweets, bitHourly) # get info for regular tweets
 tweetsDaily = get_daily_bitcoin(tweets, bitDaily) # get daily purhcases
-tweetsData.pop(len(tweets)) # drop Tweet announcing daily purchases
+tweetsData.popitem() # drop Tweet announcing daily purchases
 tweetsAll = {**tweetsData, **tweetsDaily} # join Tweet dictionaries
 
 #DAILY LOGIC
