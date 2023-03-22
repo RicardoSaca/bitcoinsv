@@ -141,6 +141,7 @@ def portfolio_return(df):
         Sum of investment weight * investment return
         Calculate investment weight using df['Column'].sum()
     """
+    df = df.iloc[:-1,:].copy()
     costTotal = df["Cost"].sum()
     df['Weight'] = df.apply(lambda x: (x["Cost"]/costTotal), axis=1)
     df['W*R'] = df.apply(lambda x: x['Weight'] * x['% P/L'], axis=1)
