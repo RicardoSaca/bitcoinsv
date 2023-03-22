@@ -18,7 +18,6 @@ def get_bitcoin_data(ticker, minDate, maxDate, column, interval):
     if column: return df[column]
     else: return df
 
-
 def get_bitcoin_price(tweets, bitHourly):
     #Identify price of tweet
     for tweet in tweets:

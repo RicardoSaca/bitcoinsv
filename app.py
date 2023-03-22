@@ -19,8 +19,9 @@ bitHourly = get_bitcoin_data("BTC-USD", minDate, maxDate, "Close", "1h")
 bitPrice = get_latest_bitcoin_price('BTC-USD')
 tweetsData = get_bitcoin_price(tweets, bitHourly) # get info for regular tweets
 tweetsDaily = get_daily_bitcoin(tweets, bitDaily) # get daily purhcases
-tweetsData.popitem() # drop Tweet announcing daily purchases
-tweetsAll = {**tweetsData, **tweetsDaily} # join Tweet dictionaries
+tweetsAll = {**tweetsData} # join Tweet dictionaries
+tweetsAll.pop(12) # drop Tweet announcing daily purchases
+
 
 #DAILY LOGIC
 dailyComplete = get_investment_value(tweetsDaily, bitPrice[1])
@@ -29,14 +30,12 @@ dailyFormat = format_df(dailyDf.copy())
 dailyHtml = df_to_html(dailyFormat)
 dailyRow = add_daily(dailyDf)
 
-tweetsComplete = get_investment_value(tweetsData, bitPrice[1])
+tweetsComplete = get_investment_value(tweetsAll, bitPrice[1])
 tweetsComplete[(len(tweetsDaily)+1)] = dailyRow
 tweetsDf = dict_to_df(tweetsComplete)
 tweetsFormat = format_df(tweetsDf.copy(), summary=True)
 portReturn = portfolio_return(tweetsFormat)
 tweetsHtml = df_to_html(tweetsFormat)
-
-
 
 
 col1, col2, col3 = st.columns(3)
