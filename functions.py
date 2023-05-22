@@ -22,7 +22,7 @@ def get_bitcoin_price(tweets, bitHourly):
     #Identify price of tweet
     for tweet in tweets:
         date = tweets[tweet]['date']
-        date = pd.Timestamp(date)
+        date = pd.Timestamp(date, tz='America/El_Salvador').tz_convert('UTC')
         bitPrice = bitHourly.iloc[bitHourly.index.get_indexer([date], method='nearest')][0]
         tweets[tweet]['bitcoin_price'] = bitPrice
 

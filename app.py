@@ -49,7 +49,8 @@ with col2:
     st.metric(f"Position Return", value=port_delta, delta=f"{portReturn['return']:-,.2f}%")
 with col3:
     #Bitcoin Value
-    st.metric(f'Bitcoin Price as of {bitPrice[0].strftime("%Y-%b-%d %H:%M %Z")}', value=f'${bitPrice[1]:,.2f}')
+    time = pd.Timestamp(bitPrice[0]).tz_localize('America/El_Salvador')
+    st.metric(f'Bitcoin Price as of {time.strftime("%Y-%b-%d %H:%M %Z")}', value=f'${bitPrice[1]:,.2f}')
 
 with st.container():
     st.write(tweetsHtml, unsafe_allow_html=True)
