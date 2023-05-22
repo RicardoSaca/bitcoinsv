@@ -55,11 +55,9 @@ with col3:
 with st.container():
     st.write(tweetsHtml, unsafe_allow_html=True)
 
-st.markdown('#')
 
 with st.expander("Daily Bitcoin Purchase Detail 🔁"):
     st.write(dailyHtml, unsafe_allow_html=True)
-    st.markdown('#')
 
 with st.container():
     st.text('')
