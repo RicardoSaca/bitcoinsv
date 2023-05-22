@@ -54,6 +54,7 @@ with col3:
 
 with st.container():
     st.write(tweetsHtml, unsafe_allow_html=True)
+    st.text('')
 
 
 with st.expander("Daily Bitcoin Purchase Detail 🔁"):
