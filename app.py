@@ -87,5 +87,17 @@ with st.expander("Bitcoin Price Chart"):
     fig.update_layout(
         title="Bitcoin Price Chart"
     )
+    fig.update_xaxes(
+            rangeslider_visible=False,
+            rangeselector=dict(
+                buttons=list([
+                    dict(count=1, label="1m", step="month", stepmode="backward"),
+                    dict(count=3, label="3m", step="month", stepmode="backward"),
+                    dict(count=6, label="6m", step="month", stepmode="backward"),
+                    dict(step="all")
+                ]),
+            ),
+            type="date"
+    )
 
     st.plotly_chart(fig, use_container_width=True)
