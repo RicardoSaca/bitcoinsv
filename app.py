@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import datetime as dt
-from functions import dict_to_df, get_bitcoin_data, get_bitcoin_price, get_investment_value, get_latest_bitcoin_price, format_df, df_to_html, portfolio_return, create_plot, line_chart, get_daily_bitcoin, add_daily
+from functions import dict_to_df, get_bitcoin_data, get_bitcoin_price, get_investment_value, get_latest_bitcoin_price, format_df, df_to_html, portfolio_return, create_plot, line_chart, get_daily_bitcoin, add_daily,get_historical_bitcoin
 from tweets import tweets
 
 st.set_page_config(layout="wide")
@@ -13,7 +13,9 @@ bitDaily =  get_bitcoin_data("BTC-USD", dt.datetime(2022, 11, 16), pd.Timestamp.
 #Set min and max date from tweets dictionary
 minDate = tweets[min(tweets, key=lambda x:tweets[x]['date'])]['date'].replace(second=0, hour=0, minute=0)
 maxDate = tweets[max(tweets, key=lambda x:tweets[x]['date'])]['date'].replace(second=0, hour=0, minute=0) + dt.timedelta(days=1)
-bitHourly = get_bitcoin_data("BTC-USD", minDate, maxDate, "Close", "1h")
+
+# bitHourly = get_bitcoin_data("BTC-USD", minDate, maxDate, "Close", "1h")
+bitHourly = get_historical_bitcoin("BTC-USD", 3600, minDate, maxDate, "close")
 
 # Prep all data
 bitPrice = get_latest_bitcoin_price('BTC-USD')

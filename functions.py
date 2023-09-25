@@ -1,5 +1,6 @@
 import pandas as pd
 import yfinance as yf
+from Historic_Crypto import HistoricalData
 import datetime as dt
 import numpy as np
 import plotly.graph_objects as go
@@ -12,6 +13,25 @@ def get_latest_bitcoin_price(ticker):
     bitcoinPrice = df['Close'].iloc[-1] if df.shape[0] > 1 else df['Close'].iloc[0]
     time = dt.datetime.fromtimestamp(int(round(df.index[-1].timestamp())))
     return [time, bitcoinPrice]
+
+
+def get_historical_bitcoin(ticker, granularity, start_date, end_date, column):
+    try:
+        df = pd.read_pickle('./historic.pkl')
+    except Exception as e:
+        print(e)
+        df = HistoricalData(ticker, granularity, start_date.strftime('%Y-%m-%d-%H-%M'), end_date.strftime('%Y-%m-%d-%H-%M')).retrieve_data()
+        df.index = df.index.tz_localize('UTC')
+        df.to_pickle('./historic.pkl')
+    if df.index.max().strftime('%Y-%m-%d %H:00:00') != end_date.strftime('%Y-%m-%d %H:00:00'):
+        print('MISSING DATA')
+        start = df.index.max()
+        print(f'getting data from {start} - {end_date}')
+        missing = HistoricalData(ticker, granularity, start.strftime('%Y-%m-%d-%H-%M'), end_date.strftime('%Y-%m-%d-%H-%M')).retrieve_data()
+        df = pd.concat([df, missing])
+    else: print('NO MISSING DATA')
+    if column: return df[column]
+    else: return df
 
 def get_bitcoin_data(ticker, minDate, maxDate, column, interval):
     df = yf.download(ticker, start=minDate, end=maxDate, interval=interval)
