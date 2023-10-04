@@ -29,7 +29,7 @@ multitasking==0.0.11
 numpy==1.24.3
 packaging==23.1
 pandas==1.5.2
-Pillow==9.4.0
+Pillow==10.0.1
 pip-upgrader==1.4.15
 plotly==5.11.0
 protobuf==3.20.3
