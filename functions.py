@@ -43,7 +43,7 @@ def get_bitcoin_price(tweets, bitHourly):
     for tweet in tweets:
         date = tweets[tweet]['date']
         date = pd.Timestamp(date, tz='America/El_Salvador').tz_convert('UTC')
-        bitPrice = bitHourly.iloc[bitHourly.index.get_indexer([date], method='nearest')][0]
+        bitPrice = bitHourly.iloc[bitHourly.index.get_indexer([date], method='nearest')].iloc[0]
         tweets[tweet]['bitcoin_price'] = bitPrice
 
     #Return tweets
@@ -58,7 +58,7 @@ def get_daily_bitcoin(tweets, bitDaily):
     for day in range(1, int((pd.Timestamp.today() - bit_per_day_date).days)):
         date = pd.to_datetime((bit_per_day_date + datetime.timedelta(days=day))).strftime('%Y-%m-%d')
         latest += 1
-        bitPrice = bitDaily.iloc[bitDaily.index.get_indexer([date], method='nearest')][0]
+        bitPrice = bitDaily.iloc[bitDaily.index.get_indexer([date], method='nearest')].iloc[0]
         tweetsDaily[latest] = {'date': pd.to_datetime((bit_per_day_date + datetime.timedelta(days=day)).strftime('%Y-%m-%d')),
                             'link':'https://twitter.com/nayibbukele/status/1593113857261965312?s=46&t=lTdkuYKDUQ6KKCYNpKuVIQ',
                             'num_coins':1,
@@ -123,9 +123,9 @@ def format_df(df, summary=False):
 
 def df_to_html(df):
     last_row = pd.IndexSlice[df.index[df.index == "Total"], :]
-    html = df.style.applymap(color_return_int, subset=['% P/L'])\
-                .applymap(color_return_str, subset=['P/L'])\
-                .applymap(style_bold, subset=last_row)\
+    html = df.style.map(color_return_int, subset=['% P/L'])\
+                .map(color_return_str, subset=['P/L'])\
+                .map(style_bold, subset=last_row)\
                 .set_table_attributes('id="tweet-table"')\
                 .format(precision=2, na_rep='MISSING', thousands=",", formatter={('% P/L') : "{:.2f} %"})\
                 .format("${:,.2f}", na_rep='MISSING', subset=['Bitcoin Price', 'Cost','Current Value'])\
@@ -187,7 +187,7 @@ def line_chart(df, fig):
         'type': 'scatter',
         'fill':'tozeroy',
         'line':{
-            'color': 'green' if df.Close[0] < df.Close[-1] else 'red'},
+            'color': 'green' if df.Close.iloc[0] < df.Close.iloc[-1] else 'red'},
         'name': 'Close',
     }
 
