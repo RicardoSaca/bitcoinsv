@@ -46,13 +46,14 @@ with col1:
     #Investment Position Value
     st.metric(f"Bukele's Position", value=f"${portReturn['current']:,.2f}", delta=f"₿{tweetsDf['num_coins'].sum():,.0f}", delta_color='off')
 with col2:
-    #Investment Gain/Loss
-    port_delta = f'$({abs(tweetsDf["gain/loss"].sum()):,.2f})' if (tweetsDf["gain/loss"].sum())<0 else f'${tweetsDf["gain/loss"].sum():,.2f}'
+    #Investment Gain/Loss]
+    gain_loss = tweetsDf["gain/loss"].sum().item()
+    port_delta = f'$({abs(gain_loss):,.2f})' if (gain_loss)<0 else f'${gain_loss:,.2f}'
     st.metric(f"Position Return", value=port_delta, delta=f"{portReturn['return']:-,.2f}%")
 with col3:
     #Bitcoin Value
     time = pd.Timestamp(bitPrice[0], tz='UTC').tz_convert('America/El_Salvador')
-    st.metric(f'Bitcoin Price as of {time.strftime("%Y-%b-%d %H:%M %Z")}', value=f'${bitPrice[1]:,.2f}')
+    st.metric(f'Bitcoin Price as of {time.strftime("%Y-%b-%d %H:%M %Z")}', value=f'${bitPrice[1].item():,.2f}')
 
 with st.container():
     st.write(tweetsHtml, unsafe_allow_html=True)
@@ -64,7 +65,8 @@ with st.expander("Daily Bitcoin Purchase Detail 🔁"):
 
 with st.container():
     st.text('')
-    pt3 = f'$({abs(tweetsDf["gain/loss"].sum()):,.2f})' if (tweetsDf["gain/loss"].sum())<0 else f'${tweetsDf["gain/loss"].sum():,.2f}'
+    gain_loss = tweetsDf["gain/loss"].sum().item()
+    pt3 = f'$({abs(gain_loss):,.2f})' if (gain_loss)<0 else f'${gain_loss:,.2f}'
     color = f"{'green' if portReturn['return'] > 0 else 'red'}"
     total_cost = f"{portReturn['totalCost']:,.2f}"
     st.markdown('# Summary:')
@@ -83,7 +85,6 @@ with st.container():
 
 with st.expander("Bitcoin Price Chart"):
     df = get_bitcoin_data('BTC-USD', dt.date.today() - dt.timedelta(days=365), dt.date.today(), None, '1h')
-
     fig = create_plot()
     line_chart(df, fig)
     fig.update_layout(

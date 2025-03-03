@@ -9,7 +9,7 @@ from tweets import tweets
 import datetime
 
 def get_latest_bitcoin_price(ticker):
-    df =yf.download(ticker, period='1d', interval='1m')
+    df =yf.download(ticker, period='1d', interval='1m', auto_adjust=True)
     bitcoinPrice = df['Close'].iloc[-1] if df.shape[0] > 1 else df['Close'].iloc[0]
     time = dt.datetime.fromtimestamp(int(round(df.index[-1].timestamp())))
     return [time, bitcoinPrice]
@@ -111,14 +111,18 @@ def format_df(df, summary=False):
                         "original_cost":"Cost","current_investment":"Current Value",
                         "gain/loss":"P/L","pct gain/loss":"% P/L"},
                         inplace=True)
+    df.reset_index(inplace=True, drop=True)
+    # Convert necessary columns to float
+    cols_to_convert = ['Bitcoin Price', 'Cost', 'Current Value', 'P/L', '% P/L']
+    df[cols_to_convert] = df[cols_to_convert].astype(float)
 
     df.loc['Total'] = df.iloc[:, :-1].sum()
     df.loc['Total', 'Tweet'] = '<b>Total<b>'
-    df.loc['Total', 'Bitcoin Price'] = np.average(a = df['Bitcoin Price'][:-1], weights= df['# of Bitcoin'][:-1])
+    df.loc['Total', 'Bitcoin Price'] = np.average(a = df['Bitcoin Price'][:-1], weights= df['# of Bitcoin'][:-1]).item()
     df.loc['Total', '% P/L'] = ((df.loc['Total', 'Current Value']- df.loc['Total', 'Cost'])/df.loc['Total', 'Cost'])*100
     df['# of Bitcoin'] = df['# of Bitcoin'].apply(lambda x: f"₿ {x:,.0f}")
 
-    df['P/L']=df['P/L'].apply(lambda x: f"$({abs(x):,.2f})" if (x)<0 else f"${x:,.2f}")
+    df['P/L'] = df['P/L'].apply(lambda x: f"$({abs(x):,.2f})" if x < 0 else f"${x:,.2f}")
     return df
 
 def df_to_html(df):
@@ -181,16 +185,20 @@ def create_plot():
 
 #Plot a line chart with High as value
 def line_chart(df, fig):
+    start = df.Close.iloc[0].item()
+    end = df.Close.iloc[-1].item()
+    val = start < end
+    df.columns = df.columns.get_level_values(0)
     line = {
         'x': df.index,
-        'y': df.Close,
+        'y': df['Close'],
         'type': 'scatter',
+        'mode': 'lines',
         'fill':'tozeroy',
         'line':{
-            'color': 'green' if df.Close.iloc[0] < df.Close.iloc[-1] else 'red'},
+            'color': 'green' if val else 'red'},
         'name': 'Close',
     }
-
     fig.add_trace(line, secondary_y=False )
 
 
