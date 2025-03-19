@@ -13,7 +13,7 @@ gitdb==4.0.12
 GitPython==3.1.44
 Historic-Crypto==0.1.6
 idna==3.10
-Jinja2==3.1.5
+Jinja2==3.1.6
 jsonschema==4.23.0
 jsonschema-specifications==2024.10.1
 markdown-it-py==3.0.0
@@ -43,7 +43,7 @@ setuptools==72.2.0
 six==1.17.0
 smmap==5.0.2
 soupsieve==2.6
-streamlit==1.42.2
+streamlit==1.43.2
 tenacity==9.0.0
 terminaltables==3.1.10
 toml==0.10.2
