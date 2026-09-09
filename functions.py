@@ -9,8 +9,11 @@ from tweets import tweets
 import datetime
 
 def get_latest_bitcoin_price(ticker):
-    df =yf.download(ticker, period='1d', interval='1m', auto_adjust=True)
-    bitcoinPrice = df['Close'].iloc[-1] if df.shape[0] > 1 else df['Close'].iloc[0]
+    df = yf.download(ticker, period='1d', interval='1m', auto_adjust=True)
+    close = df['Close']
+    if isinstance(close, pd.DataFrame):   # MultiIndex column case
+        close = close.iloc[:, 0]
+    bitcoinPrice = float(close.iloc[-1]) if df.shape[0] > 1 else float(close.iloc[0])
     time = dt.datetime.fromtimestamp(int(round(df.index[-1].timestamp())))
     return [time, bitcoinPrice]
 
@@ -35,6 +38,8 @@ def get_historical_bitcoin(ticker, granularity, start_date, end_date, column):
 
 def get_bitcoin_data(ticker, minDate, maxDate, column, interval):
     df = yf.download(ticker, start=minDate, end=maxDate, interval=interval)
+    if isinstance(df.columns, pd.MultiIndex):
+        df.columns = df.columns.get_level_values(0)
     if column: return df[column]
     else: return df
 

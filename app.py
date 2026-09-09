@@ -53,7 +53,7 @@ with col2:
 with col3:
     #Bitcoin Value
     time = pd.Timestamp(bitPrice[0], tz='UTC').tz_convert('America/El_Salvador')
-    st.metric(f'Bitcoin Price as of {time.strftime("%Y-%b-%d %H:%M %Z")}', value=f'${bitPrice[1].item():,.2f}')
+    st.metric(f'Bitcoin Price as of {time.strftime("%Y-%b-%d %H:%M %Z")}', value=f'${bitPrice[1]:,.2f}')
 
 with st.container():
     st.write(tweetsHtml, unsafe_allow_html=True)
@@ -103,4 +103,4 @@ with st.expander("Bitcoin Price Chart"):
             type="date"
     )
 
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width='stretch')
